@@ -40,5 +40,8 @@ fn test_input_nonexistent() {
 
   let all_input = arg_input::input(filenames);
 
-  assert!(all_input.is_err());
+  match all_input {
+    Ok(_) => panic!("input() should not have found these files"),
+    Err(errs) => assert_eq!(errs.len(), NONEXISTENT.len())
+  };
 }
