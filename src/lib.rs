@@ -4,7 +4,7 @@
 //! [`argf()`](fn.argf.html) will pull input from your command line arguments,
 //! no frills, no questions asked, and [`argf_lines()`](fn.argf_lines.html) will
 //! give you an iterator over all *lines* of command line input.
-
+//!
 //! `argf()` and `argf_lines()` assume that the command line arguments contain **only**
 //! file arguments. If you need a little more control (for example, you're using `docopt`
 //! to parse command line arguments instead), use [`input()`](fn.input.html) or
