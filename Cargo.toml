@@ -4,4 +4,11 @@ name = "arg_input"
 version = "1.0.0"
 authors = [ "William Yao <williamyaoh@gmail.com>" ]
 
+description = "ARGF-style input handling"
+repository = https://gitlab.com/williamyaoh/arg_input"
+readme = "README.md"
+license = "BSD-3-Clause"
+keywords = [ "cli", "text" ]
+categories = [ "command-line-interface", "text-processing" ]
+
 [dependencies]
