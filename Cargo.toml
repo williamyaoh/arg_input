@@ -1,0 +1,7 @@
+[package]
+
+name = "arg_input"
+version = "1.0.0"
+authors = [ "William Yao <williamyaoh@gmail.com>" ]
+
+[dependencies]
