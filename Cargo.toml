@@ -4,7 +4,7 @@ name = "arg_input"
 version = "1.0.0"
 authors = [ "William Yao <williamyaoh@gmail.com>" ]
 
-description = "ARGF-style input handling"
+description = "ARGF-style input handling for Rust"
 repository = https://gitlab.com/williamyaoh/arg_input"
 readme = "README.md"
 license = "BSD-3-Clause"
