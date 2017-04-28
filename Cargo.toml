@@ -5,7 +5,7 @@ version = "1.0.0"
 authors = [ "William Yao <williamyaoh@gmail.com>" ]
 
 description = "ARGF-style input handling for Rust"
-repository = https://gitlab.com/williamyaoh/arg_input"
+repository = "https://gitlab.com/williamyaoh/arg_input"
 readme = "README.md"
 license = "BSD-3-Clause"
 keywords = [ "cli", "text" ]
