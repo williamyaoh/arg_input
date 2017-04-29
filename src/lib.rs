@@ -16,6 +16,70 @@ use std::io::{self, Read};
 use std::io::{BufReader, BufRead};
 use std::fs::File;
 use std::path::Path;
+use std::error::Error;
+use std::fmt::{self, Display, Formatter};
+use std::convert::From;
+
+#[derive(Debug)]
+pub struct FailReadFileError {
+  pub inner: io::Error,
+  pub filename: String
+}
+
+impl Display for FailReadFileError {
+  fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
+    writeln!(f, "could not read file {}", self.filename)?;
+    writeln!(f, "caused by: {}", self.inner)?;
+    Ok(())
+  }
+}
+
+impl Error for FailReadFileError {
+  fn description(&self) -> &str {
+    "failed to read file"
+  }
+
+  fn cause(&self) -> Option<&Error> {
+    Some(&self.inner)
+  }
+}
+
+#[derive(Debug)]
+pub struct InputError {
+  pub badfiles: Vec<FailReadFileError>
+}
+
+impl Display for InputError {
+  fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
+    for e in &self.badfiles {
+      writeln!(f, "{}", e)?;
+    }
+    Ok(())
+  }
+}
+
+impl Error for InputError {
+  fn description(&self) -> &str {
+    "failed to read one or more files"
+  }
+
+  fn cause(&self) -> Option<&Error> {
+    let first = self.badfiles.first();
+
+    // There's some weird casting that I have to do here
+    // that I don't fully understand.
+    match first {
+      Some(err) => Some(err),
+      None => None
+    }
+  }
+}
+
+impl From<Vec<FailReadFileError>> for InputError {
+  fn from(err: Vec<FailReadFileError>) -> Self {
+    InputError { badfiles: err }
+  }
+}
 
 /// Add the attempt_map() function to all iterators.
 trait TryIterator {
@@ -66,7 +130,7 @@ pub type Lines = io::Lines<BufReader<Box<Read>>>;
 /// pull arguments from the command line. 
 ///
 /// See [`argf()`](fn.argf.html) for caveats.
-pub fn argf_lines() -> Result<Lines, Vec<io::Error>> {
+pub fn argf_lines() -> Result<Lines, InputError> {
   let chained = argf()?;
   let buffered = BufReader::new(chained);
 
@@ -81,7 +145,7 @@ pub fn argf_lines() -> Result<Lines, Vec<io::Error>> {
 /// treated like file names. If this is not the case and you need more fine-grained
 /// control (e.g. you're using `docopt` to parse command-line arguments instead),
 /// use `input()`.
-pub fn argf() -> Result<Box<Read>, Vec<io::Error>> {
+pub fn argf() -> Result<Box<Read>, InputError> {
   let args = args_os().skip(1);
   input(args)
 }
@@ -89,7 +153,7 @@ pub fn argf() -> Result<Box<Read>, Vec<io::Error>> {
 /// Return an iterator over all lines of input. 
 ///
 /// See [`input()`](fn.input.html) for how this handles its arguments/errors.
-pub fn input_lines<I, J, S>(inputs: I) -> Result<Lines, Vec<io::Error>> where
+pub fn input_lines<I, J, S>(inputs: I) -> Result<Lines, InputError> where
   I: IntoIterator<Item=S, IntoIter=J>,
   J: ExactSizeIterator<Item=S>,
   S: AsRef<Path>
@@ -110,7 +174,7 @@ pub fn input_lines<I, J, S>(inputs: I) -> Result<Lines, Vec<io::Error>> where
 /// specified as arguments.
 /// The argument "-" is special, and is an alias for `stdin`; this can be
 /// used to reinsert `stdin` into the contents returned, if so desired.
-pub fn input<I, J, S>(inputs: I) -> Result<Box<Read>, Vec<io::Error>> where
+pub fn input<I, J, S>(inputs: I) -> Result<Box<Read>, InputError> where
   I: IntoIterator<Item=S, IntoIter=J>,
   J: ExactSizeIterator<Item=S>,
   S: AsRef<Path>
@@ -134,12 +198,17 @@ fn chain_all_reads<I>(reads: I) -> Box<Read> where
   })
 }
 
-fn from_arg<'a>(arg: &'a Path) -> Result<Box<Read>, io::Error> {
+fn from_arg<'a>(arg: &'a Path) -> Result<Box<Read>, FailReadFileError> {
   let str_repr = arg.to_string_lossy();
   if str_repr == "-" {
     Ok(Box::new(io::stdin()))
   } else {
-    let file = File::open(arg)?;
+    let file = File::open(arg).map_err(|err| {
+      FailReadFileError {
+        inner: err,
+        filename: arg.to_string_lossy().to_string()
+      }
+    })?;
     Ok(Box::new(file))
   }
 }

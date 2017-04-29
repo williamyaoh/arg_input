@@ -35,6 +35,6 @@ fn test_input_lines_nonexistent() {
 
   match all_input {
     Ok(_) => panic!("input_lines() should not have found these files"),
-    Err(errs) => assert_eq!(errs.len(), NONEXISTENT.len())
+    Err(errs) => assert_eq!(errs.badfiles.len(), NONEXISTENT.len())
   }
 }
