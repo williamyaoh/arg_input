@@ -10,7 +10,6 @@ pub fn attach_input_dir<'a>(input_name: &'a str) -> PathBuf {
   fullpath.push("tests");
   fullpath.push("inputs");
   fullpath.push(input_name);
-  println!("{:?}", fullpath);
 
   fullpath
 }

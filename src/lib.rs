@@ -29,7 +29,7 @@ pub struct FailReadFileError {
 impl Display for FailReadFileError {
   fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
     writeln!(f, "could not read file {}", self.filename)?;
-    writeln!(f, "caused by: {}", self.inner)?;
+    write!(f, "caused by: {}", self.inner)?;
     Ok(())
   }
 }
